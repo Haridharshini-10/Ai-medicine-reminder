@@ -15,11 +15,11 @@ const AppContent = () => {
   // Define routes where the Navbar should NOT appear
   const noNavbarRoutes = ["/register", "/login","/side","/add-medicine","/add-hospital","/add-patient"];
 
+
   return (
     <>
       {/* Conditionally render Navbar */}
-      {!noNavbarRoutes.includes(location.pathname) && <Navbar />}
-
+      {!noNavbarRoutes.includes(location.pathname) && <Navbar />} 
       {/* Route definitions */}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -33,11 +33,21 @@ const AppContent = () => {
     </>
   );
 };
+const SideContent = () =>{
+  const location = useLocation();
+  const noPersistentDrawerLeftRoutes = ['/register','/login','/'];
+  return(
+    <>
+    {!noPersistentDrawerLeftRoutes.includes(location.pathname) && <PersistentDrawerLeft />}
+      </>
+  )
+}
 
 function App() {
   return (
     <Router>
       <AppContent />
+      <SideContent />
     </Router>
   );
 }
