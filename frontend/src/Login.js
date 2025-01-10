@@ -1,5 +1,12 @@
-import React from "react";
-import { CssBaseline, Box, Typography, TextField, Button, Link } from "@mui/material";
+import React, {  } from "react";
+import {
+  CssBaseline,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Link,
+} from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 
@@ -9,24 +16,20 @@ const theme = createTheme({
       default: "#E3F2FD", // Light blue background
     },
   },
-  typography: {
-    h1: {
-      fontWeight: 700,
-    },
-  },
 });
 
 const Login = () => {
   const navigate = useNavigate();
-
+ 
   const handleLogin = () => {
-    // Implement authentication logic here
     navigate("/Admin Dashboard");
   };
 
   const handleSignUp = () => {
     navigate("/register");
   };
+
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -38,7 +41,6 @@ const Login = () => {
         height="100vh"
         sx={{
           background: `linear-gradient(135deg, rgba(227,242,253,1) 0%, rgba(144,202,249,1) 100%)`,
-          animation: "backgroundAnimation 8s infinite alternate",
         }}
       >
         <Box
@@ -50,7 +52,7 @@ const Login = () => {
           textAlign="center"
         >
           <Typography variant="h4" gutterBottom>
-            Login
+            AI Medicine Reminder
           </Typography>
           <TextField
             fullWidth
@@ -90,6 +92,8 @@ const Login = () => {
             </Link>
           </Typography>
         </Box>
+
+       
       </Box>
     </ThemeProvider>
   );

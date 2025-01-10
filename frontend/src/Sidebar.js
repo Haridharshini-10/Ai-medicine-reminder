@@ -20,7 +20,7 @@ import MedicationLiquidIcon from '@mui/icons-material/MedicationLiquid';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import PersonIcon from '@mui/icons-material/Person';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import AddHomeIcon from '@mui/icons-material/AddHome';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -35,11 +35,11 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
     }),
     marginLeft: `-${drawerWidth}px`,
     ...(open && {
+      marginLeft: 0,
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.easeOut,
         duration: theme.transitions.duration.enteringScreen,
       }),
-      marginLeft: 0,
     }),
   })
 );
@@ -57,7 +57,7 @@ const AppBar = styled(MuiAppBar, {
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
-    }),
+      }),
   }),
 }));
 
@@ -72,23 +72,22 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
-  const [manageHospitalOpen, setManageHospitalOpen] = useState(false); // State to manage "Manage Hospital" dropdown
+  const [manageHospitalOpen, setManageHospitalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
-  const toggleManageHospitalMenu = () => {
-    setManageHospitalOpen((prev) => !prev); // Toggle the visibility of the "Manage Hospital" sub-menu
-  };
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
+  const toggleManageHospitalMenu = () => setManageHospitalOpen((prev) => !prev);
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        '&:hover .MuiDrawer-root': {
+          width: drawerWidth,
+        },
+      }}
+    >
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -111,13 +110,18 @@ export default function PersistentDrawerLeft() {
           width: drawerWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
+            width: open ? drawerWidth : 0,
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.easeOut,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
           },
         }}
         variant="persistent"
         anchor="left"
         open={open}
+        onMouseEnter={handleDrawerOpen}
+        onMouseLeave={handleDrawerClose}
       >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
@@ -126,62 +130,77 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-  {[{ text: 'Home', icon: <AddHomeIcon />, path: '/Home' },
-    { text: 'Admin Dashboard', icon: <AdminPanelSettingsIcon />, path: '/side' },
-    {
-      text: 'Manage Hospital',
-      icon: <LocalHospitalIcon />,
-      path: '',
-      onClick: toggleManageHospitalMenu,
-      subItems: [
-        { text: 'Add Hospital', icon: <PersonIcon />, path: '/add-hospital' },
-        { text: 'View Hospital', icon: <PersonIcon />, path: '/view-hospital' },
-        { text: 'Edit Hospital', icon: <PersonIcon />, path: '/edit-hospital' },
-      ],
-    },
-    { text: 'Add Patient', icon: <PersonIcon />, path: '/add-patient' },
-    { text: 'Add Medicine', icon: <MedicationLiquidIcon />, path: '/add-medicine' },
-  ].map((item) => (
-    <ListItem key={item.text} disablePadding>
-      <ListItemButton onClick={() => {
-        if (item.subItems) {
-          toggleManageHospitalMenu(); // Toggle submenu
-        } else {
-          navigate(item.path); // Navigate if no submenu
-        }
-      }}>
-        <ListItemIcon>{item.icon}</ListItemIcon>
-        <ListItemText primary={item.text} />
-      </ListItemButton>
-   {item.subItems && (
-  <List
-    sx={{
-      display: manageHospitalOpen ? 'block' : 'none', // Show/hide submenu conditionally
-      marginLeft: 0, // Align submenu with parent item
-      marginTop: 0,  // Ensure it appears directly below
-      paddingLeft: 4, // Optional: Indent submenu for a hierarchical look
-    }}
-  >
-    {item.subItems.map((subItem) => (
-      <ListItem key={subItem.text} disablePadding>
-        <ListItemButton onClick={() => navigate(subItem.path)}>
-          <ListItemIcon sx={{ minWidth: 30 }}>{subItem.icon}</ListItemIcon>
-          <ListItemText primary={subItem.text} />
-        </ListItemButton>
-      </ListItem>
-    ))}
-  </List>
-)}
-
-    </ListItem>
-  ))}
-</List>
-
+          {[
+            { text: 'Admin Dashboard', icon: <AdminPanelSettingsIcon />, path: '/side' },
+            {
+              text: 'Manage Hospital',
+              icon: <LocalHospitalIcon />,
+              path: '',
+              onClick: toggleManageHospitalMenu,
+              subItems: [
+                { text: 'Add Hospital', icon: <PersonIcon />, path: '/add-hospital' },
+                { text: 'View Hospital', icon: <PersonIcon />, path: '/view-hospital' },
+                { text: 'Edit Hospital', icon: <PersonIcon />, path: '/edit-hospital' },
+              ],
+            },
+            { text: 'Add Patient', icon: <PersonIcon />, path: '/add-patient' },
+            { text: 'Add Medicine', icon: <MedicationLiquidIcon />, path: '/add-medicine' },
+          ].map((item) => (
+            <React.Fragment key={item.text}>
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    if (item.subItems) toggleManageHospitalMenu();
+                    else navigate(item.path);
+                  }}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText
+                    primary={
+                      item.subItems ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          {item.text}
+                          <ArrowRightIcon
+                            sx={{
+                              fontSize: '1rem',
+                              ml: 1,
+                              transform: manageHospitalOpen ? 'rotate(90deg)' : 'none',
+                              transition: 'transform 0.3s',
+                            }}
+                          />
+                        </Box>
+                      ) : (
+                        item.text
+                      )
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+              {item.subItems && (
+                <List
+                  sx={{
+                    display: manageHospitalOpen ? 'block' : 'none',
+                    pl: 4, // Add padding to indent sub-items
+                  }}
+                >
+                  {item.subItems.map((subItem) => (
+                    <ListItem key={subItem.text} disablePadding>
+                      <ListItemButton onClick={() => navigate(subItem.path)}>
+                        <ListItemIcon sx={{ minWidth: 30 }}>{subItem.icon}</ListItemIcon>
+                        <ListItemText primary={subItem.text} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </React.Fragment>
+          ))}
+        </List>
         <Divider />
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        {/* Additional components can go here */}
+        {/* Your main content here */}
       </Main>
     </Box>
   );
