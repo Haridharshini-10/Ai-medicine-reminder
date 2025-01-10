@@ -16,24 +16,63 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [errorMessage, setErrorMessage] = useState(""); // State for error message
   const navigate = useNavigate(); // Hook for navigation
 
   const validateForm = () => {
     const newErrors = {};
+    
+    // Username validation
     if (!username.trim()) newErrors.username = "Username is required.";
+
+    // Email validation
     if (!email.trim()) newErrors.email = "Email is required.";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is not valid.";
+
+    // Password validation
     if (!password.trim()) newErrors.password = "Password is required.";
+    else if (password.length < 6) newErrors.password = "Password must be at least 6 characters long.";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      alert("Registration successful!");
-      navigate("/login"); // Redirect to login page
+  
+    if (!validateForm()) return; // Validate the form before proceeding
+
+    try {
+      const response = await fetch("http://localhost:5001/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Registration successful:", data);
+        setSuccessMessage(data.message);
+        setTimeout(() => {
+          navigate("/login"); // Navigate to the login page after a short delay
+        }, 2000); // Delay for 2 seconds to show the success message
+      } else {
+        console.error("Registration failed:", data.error);
+        setErrorMessage(data.error || "An error occurred.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMessage("An error occurred while registering. Please try again.");
     }
   };
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -52,9 +91,15 @@ const Register = () => {
             Register
           </Typography>
 
-          {Object.keys(errors).length > 0 && (
+          {errorMessage && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              Please fill out all fields correctly.
+              {errorMessage}
+            </Alert>
+          )}
+
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {successMessage}
             </Alert>
           )}
 
@@ -93,6 +138,7 @@ const Register = () => {
           </form>
         </Box>
       </Box>
+  
     </ThemeProvider>
   );
 };

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { CssBaseline, Box, TextField, Button, Typography, Alert } from "@mui/material";
+import React from "react";
+import { CssBaseline, Box, Typography, TextField, Button, Link } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 
@@ -9,90 +9,86 @@ const theme = createTheme({
       default: "#E3F2FD", // Light blue background
     },
   },
+  typography: {
+    h1: {
+      fontWeight: 700,
+    },
+  },
 });
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
-  const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!username.trim()) newErrors.username = "Username is required.";
-    if (!password.trim()) newErrors.password = "Password is required.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleLogin = () => {
+    // Implement authentication logic here
+    navigate("/Admin Dashboard");
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      // For demo purposes, assuming username is "user" and password is "password"
-      if (username === "Hari" && password === "1234") {
-        setLoginSuccess(true);
-        alert("Login successful!");
-        navigate("/side");
-      } else {
-        setLoginSuccess(false);
-        alert("Invalid credentials. Please try again.");
-      }
-    }
+  const handleSignUp = () => {
+    navigate("/register");
   };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          backgroundColor: theme.palette.background.default,
+          background: `linear-gradient(135deg, rgba(227,242,253,1) 0%, rgba(144,202,249,1) 100%)`,
+          animation: "backgroundAnimation 8s infinite alternate",
         }}
       >
-        <Box sx={{ width: 400, p: 3, borderRadius: 2, boxShadow: 3, backgroundColor: "white" }}>
-          <Typography variant="h5" textAlign="center" mb={2}>
+        <Box
+          p={4}
+          borderRadius={4}
+          boxShadow={4}
+          bgcolor="white"
+          width="400px"
+          textAlign="center"
+        >
+          <Typography variant="h4" gutterBottom>
             Login
           </Typography>
-
-          {Object.keys(errors).length > 0 && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              Please fill out all fields correctly.
-            </Alert>
-          )}
-
-          <form onSubmit={handleLogin}>
-            <TextField
-              fullWidth
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              error={!!errors.username}
-              helperText={errors.username}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={!!errors.password}
-              helperText={errors.password}
-              sx={{ mb: 2 }}
-            />
-            <Button type="submit" variant="contained" fullWidth>
-              Login
-            </Button>
-          </form>
-          {!loginSuccess && username && password && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              Invalid username or password.
-            </Alert>
-          )}
+          <TextField
+            fullWidth
+            label="Username"
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            margin="normal"
+            variant="outlined"
+          />
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            onClick={handleLogin}
+          >
+            Login
+          </Button>
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            Or
+          </Typography>
+          
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            Don't have an account?{" "}
+            <Link
+              component="button"
+              variant="body2"
+              onClick={handleSignUp}
+              underline="none"
+            >
+              Sign up
+            </Link>
+          </Typography>
         </Box>
       </Box>
     </ThemeProvider>

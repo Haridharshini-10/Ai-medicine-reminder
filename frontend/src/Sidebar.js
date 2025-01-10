@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -19,7 +19,8 @@ import ListItemText from '@mui/material/ListItemText';
 import MedicationLiquidIcon from '@mui/icons-material/MedicationLiquid';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import PersonIcon from '@mui/icons-material/Person';
-
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AddHomeIcon from '@mui/icons-material/AddHome';
 import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -40,7 +41,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       }),
       marginLeft: 0,
     }),
-  }),
+  })
 );
 
 const AppBar = styled(MuiAppBar, {
@@ -70,7 +71,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function PersistentDrawerLeft() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [manageHospitalOpen, setManageHospitalOpen] = useState(false); // State to manage "Manage Hospital" dropdown
   const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
@@ -81,8 +83,12 @@ export default function PersistentDrawerLeft() {
     setOpen(false);
   };
 
+  const toggleManageHospitalMenu = () => {
+    setManageHospitalOpen((prev) => !prev); // Toggle the visibility of the "Manage Hospital" sub-menu
+  };
+
   return (
-    <Box sx={{ display: 'flex', backgroundColor: 'lightblue', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -120,24 +126,62 @@ export default function PersistentDrawerLeft() {
         </DrawerHeader>
         <Divider />
         <List>
-          {[
-            { text: 'Add Medicine', icon: <MedicationLiquidIcon />, path: '/add-medicine' },
-            { text: 'Add Hospital', icon: <LocalHospitalIcon />, path: '/add-hospital' },
-            { text: 'Add Patient', icon: <PersonIcon />, path: '/add-patient' },
-          ].map((item) => (
-            <ListItem key={item.text} disablePadding>
-              <ListItemButton onClick={() => navigate(item.path)}>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+  {[{ text: 'Home', icon: <AddHomeIcon />, path: '/Home' },
+    { text: 'Admin Dashboard', icon: <AdminPanelSettingsIcon />, path: '/side' },
+    {
+      text: 'Manage Hospital',
+      icon: <LocalHospitalIcon />,
+      path: '',
+      onClick: toggleManageHospitalMenu,
+      subItems: [
+        { text: 'Add Hospital', icon: <PersonIcon />, path: '/add-hospital' },
+        { text: 'View Hospital', icon: <PersonIcon />, path: '/view-hospital' },
+        { text: 'Edit Hospital', icon: <PersonIcon />, path: '/edit-hospital' },
+      ],
+    },
+    { text: 'Add Patient', icon: <PersonIcon />, path: '/add-patient' },
+    { text: 'Add Medicine', icon: <MedicationLiquidIcon />, path: '/add-medicine' },
+  ].map((item) => (
+    <ListItem key={item.text} disablePadding>
+      <ListItemButton onClick={() => {
+        if (item.subItems) {
+          toggleManageHospitalMenu(); // Toggle submenu
+        } else {
+          navigate(item.path); // Navigate if no submenu
+        }
+      }}>
+        <ListItemIcon>{item.icon}</ListItemIcon>
+        <ListItemText primary={item.text} />
+      </ListItemButton>
+   {item.subItems && (
+  <List
+    sx={{
+      display: manageHospitalOpen ? 'block' : 'none', // Show/hide submenu conditionally
+      marginLeft: 0, // Align submenu with parent item
+      marginTop: 0,  // Ensure it appears directly below
+      paddingLeft: 4, // Optional: Indent submenu for a hierarchical look
+    }}
+  >
+    {item.subItems.map((subItem) => (
+      <ListItem key={subItem.text} disablePadding>
+        <ListItemButton onClick={() => navigate(subItem.path)}>
+          <ListItemIcon sx={{ minWidth: 30 }}>{subItem.icon}</ListItemIcon>
+          <ListItemText primary={subItem.text} />
+        </ListItemButton>
+      </ListItem>
+    ))}
+  </List>
+)}
+
+    </ListItem>
+  ))}
+</List>
+
         <Divider />
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        {/* You can render additional components here */}
+        {/* Additional components can go here */}
       </Main>
     </Box>
   );
