@@ -33,31 +33,18 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: `-${drawerWidth}px`,
+    marginLeft: 0,
     ...(open && {
-      marginLeft: 0,
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
+      marginLeft: `${drawerWidth}px`,
     }),
   })
 );
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  transition: theme.transitions.create(['margin', 'width'], {
+const AppBar = styled(MuiAppBar)(({ theme }) => ({
+  zIndex: theme.zIndex.drawer + 1, // Ensure navbar stays above the sidebar
+  transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-      }),
   }),
 }));
 
@@ -73,30 +60,97 @@ export default function PersistentDrawerLeft() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [manageHospitalOpen, setManageHospitalOpen] = useState(false);
+  const [managePatientOpen, setManagePatientOpen] = useState(false);
+  const [manageMedicineOpen, setManageMedicineOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
-  const toggleManageHospitalMenu = () => setManageHospitalOpen((prev) => !prev);
+
+  const menuItems = [
+    {
+      text: 'Admin Dashboard',
+      path: '/admin-dashboard',
+      icon: <AdminPanelSettingsIcon />,
+    },
+    {
+      text: 'Manage Hospital',
+      icon: <LocalHospitalIcon />,
+      subItems: [
+        {
+          text: 'Add Hospital',
+          path: '/add-hospital',
+          icon: <LocalHospitalIcon />,
+        },
+        {
+          text: 'View Hospitals',
+          path: '/view-hospital',
+          icon: <LocalHospitalIcon />,
+        },
+        {
+          text: 'Edit Hospitals',
+          path: '/edit-hospital',
+          icon: <LocalHospitalIcon />,
+        }
+      ],
+      onClick: () => setManageHospitalOpen(!manageHospitalOpen),
+    },
+    {
+      text: 'Manage Patient',
+      icon: <PersonIcon />,
+      subItems: [
+        {
+          text: 'Add Patient',
+          path: '/add-patient',
+          icon: <PersonIcon />,
+        },
+        {
+          text: 'View Patients',
+          path: '/view-patients',
+          icon: <PersonIcon />,
+        },{
+          text: 'Edit Patients',
+          path: '/view-patients',
+          icon: <PersonIcon />,
+        },
+      ],
+      onClick: () => setManagePatientOpen(!managePatientOpen),
+    },
+    {
+      text: 'Manage Medicine',
+      icon: <MedicationLiquidIcon />,
+      subItems: [
+        {
+          text: 'Add Medicine',
+          path: '/add-medicine',
+          icon: <MedicationLiquidIcon />,
+        },
+        {
+          text: 'View Medicines',
+          path: '/view-medicines',
+          icon: <MedicationLiquidIcon />,
+        },
+        {
+          text: 'Edit Medicines',
+          path: '/view-medicines',
+          icon: <MedicationLiquidIcon />,
+        },
+      ],
+      onClick: () => setManageMedicineOpen(!manageMedicineOpen),
+    },
+  ];
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        '&:hover .MuiDrawer-root': {
-          width: drawerWidth,
-        },
-      }}
-    >
+    <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
+            sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
@@ -110,47 +164,35 @@ export default function PersistentDrawerLeft() {
           width: drawerWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: open ? drawerWidth : 0,
+            width: open ? drawerWidth : 60,
             transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.easeOut,
               duration: theme.transitions.duration.enteringScreen,
             }),
+            overflowX: 'hidden',
+            backgroundColor: '#2C3E50',
+            color: '#ECF0F1',
           },
         }}
-        variant="persistent"
+        variant="permanent"
         anchor="left"
         open={open}
         onMouseEnter={handleDrawerOpen}
         onMouseLeave={handleDrawerClose}
       >
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton onClick={handleDrawerClose} sx={{ color: '#ECF0F1' }}>
             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </DrawerHeader>
         <Divider />
         <List>
-          {[
-            { text: 'Admin Dashboard', icon: <AdminPanelSettingsIcon />, path: '/side' },
-            {
-              text: 'Manage Hospital',
-              icon: <LocalHospitalIcon />,
-              path: '',
-              onClick: toggleManageHospitalMenu,
-              subItems: [
-                { text: 'Add Hospital', icon: <PersonIcon />, path: '/add-hospital' },
-                { text: 'View Hospital', icon: <PersonIcon />, path: '/view-hospital' },
-                { text: 'Edit Hospital', icon: <PersonIcon />, path: '/edit-hospital' },
-              ],
-            },
-            { text: 'Add Patient', icon: <PersonIcon />, path: '/add-patient' },
-            { text: 'Add Medicine', icon: <MedicationLiquidIcon />, path: '/add-medicine' },
-          ].map((item) => (
+          {menuItems.map((item) => (
             <React.Fragment key={item.text}>
               <ListItem disablePadding>
                 <ListItemButton
                   onClick={() => {
-                    if (item.subItems) toggleManageHospitalMenu();
+                    if (item.subItems) item.onClick();
                     else navigate(item.path);
                   }}
                 >
@@ -164,7 +206,14 @@ export default function PersistentDrawerLeft() {
                             sx={{
                               fontSize: '1rem',
                               ml: 1,
-                              transform: manageHospitalOpen ? 'rotate(90deg)' : 'none',
+                              transform:
+                                item.text === 'Manage Hospital' && manageHospitalOpen
+                                  ? 'rotate(90deg)'
+                                  : item.text === 'Manage Patient' && managePatientOpen
+                                  ? 'rotate(90deg)'
+                                  : item.text === 'Manage Medicine' && manageMedicineOpen
+                                  ? 'rotate(90deg)'
+                                  : 'none',
                               transition: 'transform 0.3s',
                             }}
                           />
@@ -179,8 +228,13 @@ export default function PersistentDrawerLeft() {
               {item.subItems && (
                 <List
                   sx={{
-                    display: manageHospitalOpen ? 'block' : 'none',
-                    pl: 4, // Add padding to indent sub-items
+                    display:
+                      (item.text === 'Manage Hospital' && manageHospitalOpen) ||
+                      (item.text === 'Manage Patient' && managePatientOpen) ||
+                      (item.text === 'Manage Medicine' && manageMedicineOpen)
+                        ? 'block'
+                        : 'none',
+                    pl: 4, // Indent sub-items
                   }}
                 >
                   {item.subItems.map((subItem) => (
@@ -200,7 +254,9 @@ export default function PersistentDrawerLeft() {
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
-        {/* Your main content here */}
+        <Typography paragraph>
+          Welcome to the Admin Dashboard. Customize this content as needed.
+        </Typography>
       </Main>
     </Box>
   );
