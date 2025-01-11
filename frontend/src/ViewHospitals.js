@@ -27,7 +27,14 @@ const ViewHospitals = ({ hospitalList = [], setHospitalList }) => { // Default t
   }
 
   return (
-    <Box sx={{ padding: "2rem" }}>
+       <Box sx={{ display: 'flex', height: '100vh' }}>
+        {/* Sidebar */}
+        <Box sx={{ width: '10px', backgroundColor: '#ADD8E6', padding: '2rem' }}>
+          {/* Add Sidebar Content Here (if needed) */}
+        </Box>
+  
+        {/* Main Content */}
+        <Box sx={{ flexGrow: 1, padding: "2rem", backgroundColor: '#ADD8E6' }}>
       <Typography variant="h4" gutterBottom>
         View Hospitals
       </Typography>
@@ -68,6 +75,7 @@ const ViewHospitals = ({ hospitalList = [], setHospitalList }) => { // Default t
           </TableBody>
         </Table>
       </TableContainer>
+    </Box>
     </Box>
   );
 };

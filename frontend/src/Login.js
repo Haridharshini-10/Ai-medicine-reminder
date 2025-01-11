@@ -75,7 +75,7 @@ const Login = () => {
         alignItems="center"
         height="100vh"
         sx={{
-          background: `linear-gradient(135deg, rgba(227,242,253,1) 0%, rgba(144,202,249,1) 100%)`,
+          background: "linear-gradient(135deg, rgba(227,242,253,1) 0%, rgba(144,202,249,1) 100%)",
         }}
       >
         <Box
