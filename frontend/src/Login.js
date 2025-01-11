@@ -1,4 +1,4 @@
-import React, {  } from "react";
+import React, { useState } from "react";
 import {
   CssBaseline,
   Box,
@@ -6,9 +6,12 @@ import {
   TextField,
   Button,
   Link,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Add axios to handle the API requests
 
 const theme = createTheme({
   palette: {
@@ -20,16 +23,48 @@ const theme = createTheme({
 
 const Login = () => {
   const navigate = useNavigate();
- 
-  const handleLogin = () => {
-    navigate("/Admin Dashboard");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5001/login",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json", // Ensure Content-Type is set
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Handle successful login
+        console.log("Login successful", response.data);
+        navigate("/Admin Dashboard"); // Redirect to the dashboard
+      }
+    } catch (error) {
+      // Handle error response
+      if (error.response && error.response.status === 401) {
+        alert("Invalid email or password.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
+      setOpenSnackbar(true);
+    }
   };
 
   const handleSignUp = () => {
     navigate("/register");
   };
-
-
 
   return (
     <ThemeProvider theme={theme}>
@@ -56,9 +91,11 @@ const Login = () => {
           </Typography>
           <TextField
             fullWidth
-            label="Username"
+            label="Email"
             margin="normal"
             variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <TextField
             fullWidth
@@ -66,6 +103,8 @@ const Login = () => {
             type="password"
             margin="normal"
             variant="outlined"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <Button
             fullWidth
@@ -79,7 +118,7 @@ const Login = () => {
           <Typography variant="body2" sx={{ mt: 2 }}>
             Or
           </Typography>
-          
+
           <Typography variant="body2" sx={{ mt: 2 }}>
             Don't have an account?{" "}
             <Link
@@ -92,9 +131,18 @@ const Login = () => {
             </Link>
           </Typography>
         </Box>
-
-       
       </Box>
+
+      {/* Snackbar for error message */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity="error">
+          {error}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 };

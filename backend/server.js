@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const mysql = require("mysql");
-const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
+const bcrypt = require("bcrypt");
 
 const app = express();
 const PORT = 5001;
@@ -14,9 +14,9 @@ app.use(bodyParser.json());
 // MySQL connection setup
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root", // Replace with your MySQL username
-  password: "", // Replace with your MySQL password
-  database: "user_management", // Replace with your database name
+  user: "root",
+  password: "",
+  database: "user_management",
 });
 
 // Connecting to MySQL
@@ -62,8 +62,8 @@ app.post("/register", async (req, res) => {
         return res.status(500).json({ error: "Database error" });
       }
 
-      console.log("User  registered successfully:", results);
-      res.status(201).json({ message: "User  registered successfully" });
+      console.log("User registered successfully:", results);
+      res.status(201).json({ message: "User registered successfully" });
     });
   } catch (error) {
     console.error("Error hashing password:", error);
@@ -100,7 +100,7 @@ app.post("/login", async (req, res) => {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      console.log("User  logged in successfully:", user);
+      console.log("User logged in successfully:", user);
       res.status(200).json({ message: "Login successful", user: { id: user.id, username: user.username, email: user.email } });
     });
   } catch (error) {

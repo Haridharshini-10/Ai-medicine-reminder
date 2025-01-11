@@ -35,7 +35,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
     }),
     marginLeft: 0,
     ...(open && {
-      marginLeft: `${drawerWidth}px`,
+      marginLeft: "${drawerWidth}px",
     }),
   })
 );
@@ -71,70 +71,35 @@ export default function PersistentDrawerLeft() {
     {
       text: 'Admin Dashboard',
       path: '/admin-dashboard',
-      icon: <AdminPanelSettingsIcon />,
+      icon: <AdminPanelSettingsIcon sx={{ color: '#ECF0F1', minWidth: 30 }} />,
     },
     {
       text: 'Manage Hospital',
-      icon: <LocalHospitalIcon />,
+      icon: <LocalHospitalIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/>,
       subItems: [
-        {
-          text: 'Add Hospital',
-          path: '/add-hospital',
-          icon: <LocalHospitalIcon />,
-        },
-        {
-          text: 'View Hospitals',
-          path: '/view-hospital',
-          icon: <LocalHospitalIcon />,
-        },
-        {
-          text: 'Edit Hospitals',
-          path: '/edit-hospital',
-          icon: <LocalHospitalIcon />,
-        }
+        { text: 'Add Hospital', path: '/add-hospital', icon: <LocalHospitalIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/> },
+        { text: 'View Hospitals', path: '/view-hospital', icon: <LocalHospitalIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/> },
+        { text: 'Edit Hospitals', path: '/edit-hospital', icon: <LocalHospitalIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/> },
       ],
       onClick: () => setManageHospitalOpen(!manageHospitalOpen),
     },
     {
       text: 'Manage Patient',
-      icon: <PersonIcon />,
+      icon: <PersonIcon sx={{ color: '#ECF0F1', minWidth: 30 }} />,
       subItems: [
-        {
-          text: 'Add Patient',
-          path: '/add-patient',
-          icon: <PersonIcon />,
-        },
-        {
-          text: 'View Patients',
-          path: '/view-patients',
-          icon: <PersonIcon />,
-        },{
-          text: 'Edit Patients',
-          path: '/view-patients',
-          icon: <PersonIcon />,
-        },
+        { text: 'Add Patient', path: '/add-patient', icon: <PersonIcon sx={{ color: '#ECF0F1', minWidth: 30 }} /> },
+        { text: 'View Patients', path: '/view-patients', icon: <PersonIcon sx={{ color: '#ECF0F1', minWidth: 30 }} /> },
+        { text: 'Edit Patients', path: '/edit-patients', icon: <PersonIcon sx={{ color: '#ECF0F1', minWidth: 30 }} /> },
       ],
       onClick: () => setManagePatientOpen(!managePatientOpen),
     },
     {
       text: 'Manage Medicine',
-      icon: <MedicationLiquidIcon />,
+      icon: <MedicationLiquidIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/>,
       subItems: [
-        {
-          text: 'Add Medicine',
-          path: '/add-medicine',
-          icon: <MedicationLiquidIcon />,
-        },
-        {
-          text: 'View Medicines',
-          path: '/view-medicines',
-          icon: <MedicationLiquidIcon />,
-        },
-        {
-          text: 'Edit Medicines',
-          path: '/view-medicines',
-          icon: <MedicationLiquidIcon />,
-        },
+        { text: 'Add Medicine', path: '/add-medicine', icon: <MedicationLiquidIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/> },
+        { text: 'View Medicines', path: '/view-medicines', icon: <MedicationLiquidIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/> },
+        { text: 'Edit Medicines', path: '/edit-medicines', icon: <MedicationLiquidIcon sx={{ color: '#ECF0F1', minWidth: 30 }}/> },
       ],
       onClick: () => setManageMedicineOpen(!manageMedicineOpen),
     },
@@ -143,22 +108,27 @@ export default function PersistentDrawerLeft() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Admin Dashboard
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <AppBar
+      position="fixed"
+      sx={{
+        backgroundColor: "#2C3E50", // Grey background
+      }}
+    >
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          onClick={handleDrawerOpen}
+          edge="start"
+          sx={{ mr: 2 }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" noWrap component="div">
+          AI REMINDER SYSTEM
+        </Typography>
+      </Toolbar>
+    </AppBar>
       <Drawer
         sx={{
           width: drawerWidth,
@@ -178,7 +148,12 @@ export default function PersistentDrawerLeft() {
         anchor="left"
         open={open}
         onMouseEnter={handleDrawerOpen}
-        onMouseLeave={handleDrawerClose}
+        onMouseLeave={() => {
+          handleDrawerClose();
+          setManageHospitalOpen(false);
+          setManagePatientOpen(false);
+          setManageMedicineOpen(false);
+        }}
       >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose} sx={{ color: '#ECF0F1' }}>
@@ -207,11 +182,9 @@ export default function PersistentDrawerLeft() {
                               fontSize: '1rem',
                               ml: 1,
                               transform:
-                                item.text === 'Manage Hospital' && manageHospitalOpen
-                                  ? 'rotate(90deg)'
-                                  : item.text === 'Manage Patient' && managePatientOpen
-                                  ? 'rotate(90deg)'
-                                  : item.text === 'Manage Medicine' && manageMedicineOpen
+                                (item.text === 'Manage Hospital' && manageHospitalOpen) ||
+                                (item.text === 'Manage Patient' && managePatientOpen) ||
+                                (item.text === 'Manage Medicine' && manageMedicineOpen)
                                   ? 'rotate(90deg)'
                                   : 'none',
                               transition: 'transform 0.3s',
@@ -255,7 +228,7 @@ export default function PersistentDrawerLeft() {
       <Main open={open}>
         <DrawerHeader />
         <Typography paragraph>
-          Welcome to the Admin Dashboard. Customize this content as needed.
+          
         </Typography>
       </Main>
     </Box>
