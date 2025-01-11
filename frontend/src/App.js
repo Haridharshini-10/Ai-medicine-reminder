@@ -9,7 +9,10 @@ import AddHospitalForm from "./AddHospitalForm";
 import AddPatientForm from "./AddPatientForm";
 import ViewHospitals from "./ViewHospitals";
 import EditHospital from "./EditHospital";
-
+import ViewPatients from "./Viewpatient";
+import EditPatientForm from "./Editpatient";
+import ViewMedicines from "./Viewmedicine";
+import EditMedicine from "./Editmedicine";
 const AppContent = () => {
   const location = useLocation();
 
@@ -33,6 +36,12 @@ const AppContent = () => {
         <Route path="/add-patient" element={<AddPatientForm />} />
         <Route path="/view-hospital" element={<ViewHospitals />} />
         <Route path="/edit-hospital" element={<EditHospital />} />
+        <Route path="/view-patients" element={<ViewPatients />} />
+        <Route path="/edit-patients" element={<EditPatientForm />} />
+        <Route path="/view-medicines" element={<ViewMedicines/>} />
+        <Route path="/edit-medicines" element={<EditMedicine />} />
+
+
         
       </Routes>
     </>

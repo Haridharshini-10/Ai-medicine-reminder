@@ -61,7 +61,7 @@ const Register = () => {
         console.log("Registration successful:", data);
         setSuccessMessage(data.message);
         setTimeout(() => {
-          navigate("/login"); // Navigate to the login page after a short delay
+          navigate("/"); // Navigate to the login page after a short delay
         }, 2000); // Delay for 2 seconds to show the success message
       } else {
         console.error("Registration failed:", data.error);
