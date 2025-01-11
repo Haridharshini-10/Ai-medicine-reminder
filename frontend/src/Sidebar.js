@@ -104,6 +104,8 @@ export default function PersistentDrawerLeft() {
           path: '/add-patient',
           icon: <PersonIcon />,
         },
+
+        //sdsafsd
         {
           text: 'View Patients',
           path: '/view-patients',
