@@ -1,9 +1,21 @@
-import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Paper, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  MenuItem,
+  FormControl,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
-const EditHospital= () => {
-  const [formData, setFormData] = useState({
+const EditHospital = () => {
+  const { hospitalId } = useParams(); // Get the hospitalId from the URL
+  const navigate = useNavigate();
+  const [hospitalData, setHospitalData] = useState({
     hospital_name: "",
     hospital_type: "",
     address: "",
@@ -11,170 +23,216 @@ const EditHospital= () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState("");
-  const [failureMessage, setFailureMessage] = useState("");
-  const [openDialog, setOpenDialog] = useState(false); // State for the dialog
-  const navigate = useNavigate();
+  const [openSnackbar, setOpenSnackbar] = useState(false); // Snackbar state
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const hospitalTypes = [
+    "General Hospital",
+    "Private Hospital",
+    "Government Hospital",
+    "Clinic",
+    "Multi-Speciality Hospital",
+    "Speciality Hospital",
+  ];
 
+  const districts = [
+    "Ariyalur",
+    "Chennai",
+    "Coimbatore",
+    "Dharmapuri",
+    "Dindigul",
+    "Erode",
+    "Kanchipuram",
+    "Madurai",
+    "Nagai",
+    "Salem",
+    "Tirunelveli",
+    "Trichy",
+    "Vellore",
+    "Villupuram",
+    "Virudhunagar",
+  ];
+
+  // Fetch hospital data when the component loads
+  useEffect(() => {
+    const fetchHospital = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5001/hospitals/${hospitalId}`
+        );
+        setHospitalData(response.data); // Set the fetched data to the state
+      } catch (error) {
+        console.error("Error fetching hospital details:", error);
+      }
+    };
+
+    if (hospitalId) {
+      fetchHospital();
+    }
+  }, [hospitalId]);
+
+  // Handle field validation
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.hospital_name) newErrors.hospital_name = "Hospital name is required";
-    if (!formData.hospital_type) newErrors.hospital_type = "Hospital type is required";
-    if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.phone_no) {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!hospitalData.hospital_name)
+      newErrors.hospital_name = "Hospital name is required";
+    if (!hospitalData.hospital_type)
+      newErrors.hospital_type = "Hospital type is required";
+    if (!hospitalData.address) newErrors.address = "District is required";
+    if (!hospitalData.phone_no) {
       newErrors.phone_no = "Phone number is required";
-    } else if (!/^\d{10}$/.test(formData.phone_no)) {
-      newErrors.phone_no = "Phone number must be 10 digits";
+    } else if (!phoneRegex.test(hospitalData.phone_no)) {
+      newErrors.phone_no = "Phone number must start with 6-9 and have 10 digits";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setOpenDialog(true); // Show confirmation dialog if form is valid
-    } else {
-      setFailureMessage("Failed to edit hospital. Please check the form.");
-      setSuccessMessage("");
+  // Update hospital data
+  const handleUpdate = async () => {
+    if (!validateForm()) return;
+
+    try {
+      await axios.put(
+        `http://localhost:5001/hospitals/${hospitalId}`,
+        hospitalData // Send updated data to the backend
+      );
+
+      setOpenSnackbar(true); // Show Snackbar when update is successful
+      setTimeout(() => {
+        navigate("/view-hospital"); // Redirect to the hospital list page after 1 second
+      }, 1000); // 1-second delay before redirecting
+    } catch (error) {
+      if (error.response && error.response.data.errors) {
+        // Backend validation errors
+        setErrors(error.response.data.errors);
+      } else {
+        console.error("Error updating hospital:", error);
+        alert("Failed to update hospital. Please try again.");
+      }
     }
   };
 
-  const handleConfirmSubmit = () => {
-    setSuccessMessage("Hospital added successfully!");
-    navigate("/side");
-    setFailureMessage("");
-    setFormData({
-      hospital_name: "",
-      hospital_type: "",
-      address: "",
-      phone_no: "",
-    });
-    setErrors({});
-    setOpenDialog(false); // Close the dialog after submission
-  };
-
-  const handleCancelSubmit = () => {
-    setOpenDialog(false); // Close the dialog without submitting
+  // Handle Snackbar close
+  const handleSnackbarClose = () => {
+    setOpenSnackbar(false);
   };
 
   return (
     <Box
       sx={{
-        backgroundColor: "lightblue",
-        minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        height: "100vh", // Full height
+        backgroundColor: "#ADD8E6", // Light blue background color
+        overflow: "hidden", // Prevent scrollbar
       }}
     >
-      <Paper
-        elevation={3}
+      <Box
         sx={{
-          padding: "2rem",
           width: "400px",
-          borderRadius: "10px",
           backgroundColor: "white",
+          padding: "2rem",
+          borderRadius: "8px",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+          maxHeight: "100%", // Ensure it doesn't overflow
+          overflowY: "auto", // Allow internal scroll if needed
         }}
       >
-        <Typography variant="h5" component="h1" align="center" gutterBottom>
+        <Typography variant="h4" gutterBottom textAlign="center">
           Edit Hospital
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <TextField
-            fullWidth
             label="Hospital Name"
-            name="hospital_name"
-            value={formData.hospital_name}
-            onChange={handleChange}
+            value={hospitalData.hospital_name || ""}
+            onChange={(e) =>
+              setHospitalData({
+                ...hospitalData,
+                hospital_name: e.target.value,
+              })
+            }
             error={!!errors.hospital_name}
             helperText={errors.hospital_name}
-            margin="normal"
           />
+          <FormControl fullWidth>
+            <TextField
+              select
+              label="Hospital Type"
+              value={hospitalData.hospital_type || ""}
+              onChange={(e) =>
+                setHospitalData({
+                  ...hospitalData,
+                  hospital_type: e.target.value,
+                })
+              }
+              error={!!errors.hospital_type}
+              helperText={errors.hospital_type}
+            >
+              {hospitalTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              select
+              label="District"
+              value={hospitalData.address || ""}
+              onChange={(e) =>
+                setHospitalData({
+                  ...hospitalData,
+                  address: e.target.value,
+                })
+              }
+              error={!!errors.address}
+              helperText={errors.address}
+            >
+              {districts.map((district) => (
+                <MenuItem key={district} value={district}>
+                  {district}
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormControl>
           <TextField
-            fullWidth
-            label="Hospital Type"
-            name="hospital_type"
-            value={formData.hospital_type}
-            onChange={handleChange}
-            error={!!errors.hospital_type}
-            helperText={errors.hospital_type}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            error={!!errors.address}
-            helperText={errors.address}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
             label="Phone Number"
-            name="phone_no"
-            value={formData.phone_no}
-            onChange={handleChange}
+            value={hospitalData.phone_no || ""}
+            onChange={(e) =>
+              setHospitalData({
+                ...hospitalData,
+                phone_no: e.target.value,
+              })
+            }
             error={!!errors.phone_no}
             helperText={errors.phone_no}
-            margin="normal"
           />
           <Button
-            type="submit"
-            fullWidth
             variant="contained"
             color="primary"
-            sx={{ mt: 2 }}
+            fullWidth
+            onClick={handleUpdate}
           >
             Update
           </Button>
-          {successMessage && (
-            <Typography
-              variant="body2"
-              align="center"
-              sx={{ color: "green", mt: 2 }}
-            >
-              {successMessage}
-            </Typography>
-          )}
-          {failureMessage && (
-            <Typography
-              variant="body2"
-              align="center"
-              sx={{ color: "red", mt: 2 }}
-            >
-              {failureMessage}
-            </Typography>
-          )}
-        </form>
-      </Paper>
+        </Box>
+      </Box>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={handleCancelSubmit}>
-        <DialogTitle>Confirm Submission</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">Are you sure you want to edit this hospital?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelSubmit} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmSubmit} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Snackbar for Success Message */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={1000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          Hospital updated successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

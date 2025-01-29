@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   CssBaseline,
   Box,
@@ -6,12 +6,15 @@ import {
   TextField,
   Button,
   Link,
-  Snackbar,
+  FormHelperText,
   Alert,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Add axios to handle the API requests
+import axios from "axios";
 
 const theme = createTheme({
   palette: {
@@ -25,15 +28,40 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const loggedInEmail = sessionStorage.getItem("email");
+    if (loggedInEmail) {
+      navigate("/Admin Dashboard");
+    }
+  }, [navigate]);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setError("Please enter both email and password.");
-      setOpenSnackbar(true);
-      return;
+    // Reset previous errors and success message
+    setEmailError("");
+    setPasswordError("");
+    setSuccessMessage(""); // Reset success message
+
+    // Validation
+    let hasError = false;
+    if (!email) {
+      setEmailError("C'mon, we need an email. What's your email address?");
+      hasError = true;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError("That's not an email, genius. Try again.");
+      hasError = true;
     }
+    if (!password) {
+      setPasswordError("No password? Really? Please enter a password.");
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     try {
       const response = await axios.post(
@@ -41,24 +69,29 @@ const Login = () => {
         { email, password },
         {
           headers: {
-            "Content-Type": "application/json", // Ensure Content-Type is set
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (response.status === 200) {
-        // Handle successful login
-        console.log("Login successful", response.data);
-        navigate("/Admin Dashboard"); // Redirect to the dashboard
+        // Save email to session storage
+        sessionStorage.setItem("email", email);
+
+        // Show success message
+        setSuccessMessage("Login Successful!...");
+
+        // Redirect after a short delay
+        setTimeout(() => {
+          navigate("/Admin Dashboard");
+        }, 1000); // Wait 3 seconds before redirecting
       }
     } catch (error) {
-      // Handle error response
       if (error.response && error.response.status === 401) {
-        alert("Invalid email or password.");
+        setPasswordError("Incorrect email or password. Try again, Sherlock.");
       } else {
-        setError("An error occurred. Please try again.");
+        setEmailError("Oops, something went wrong. Try again later.");
       }
-      setOpenSnackbar(true);
     }
   };
 
@@ -96,16 +129,50 @@ const Login = () => {
             variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={!!emailError}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "#E3F2FD", // Light blue background for the entire email field
+              },
+            }}
           />
+          {emailError && (
+            <FormHelperText error>{emailError}</FormHelperText>
+          )}
           <TextField
             fullWidth
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"} // Toggle password visibility
             margin="normal"
             variant="outlined"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={!!passwordError}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "#E3F2FD", // Light blue background for the entire password field
+              },
+              "& .MuiInputAdornment-root": {
+                backgroundColor: "#E3F2FD", // Lighter blue for the eye icon area
+                borderRadius: "4px",
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
+          {passwordError && (
+            <FormHelperText error>{passwordError}</FormHelperText>
+          )}
           <Button
             fullWidth
             variant="contained"
@@ -130,19 +197,15 @@ const Login = () => {
               Sign up
             </Link>
           </Typography>
+
+          {/* Success Message - Inside the Box */}
+          {successMessage && (
+            <Box mt={2}>
+              <Alert severity="success">{successMessage}</Alert>
+            </Box>
+          )}
         </Box>
       </Box>
-
-      {/* Snackbar for error message */}
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={() => setOpenSnackbar(false)}
-      >
-        <Alert onClose={() => setOpenSnackbar(false)} severity="error">
-          {error}
-        </Alert>
-      </Snackbar>
     </ThemeProvider>
   );
 };

@@ -1,6 +1,17 @@
 import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Paper, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Paper,
+  MenuItem,
+  FormControl,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AddHospitalForm = () => {
   const [formData, setFormData] = useState({
@@ -11,10 +22,35 @@ const AddHospitalForm = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState("");
-  const [failureMessage, setFailureMessage] = useState("");
-  const [openDialog, setOpenDialog] = useState(false); // State for the dialog
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" }); // Snackbar state
   const navigate = useNavigate();
+
+  const hospitalTypes = [
+    "General Hospital",
+    "Private Hospital",
+    "Government Hospital",
+    "Clinic",
+    "Multi-Speciality Hospital",
+    "Speciality Hospital",
+  ];
+
+  const districts = [
+    "Ariyalur",
+    "Chennai",
+    "Coimbatore",
+    "Dharmapuri",
+    "Dindigul",
+    "Erode",
+    "Kanchipuram",
+    "Madurai",
+    "Nagai",
+    "Salem",
+    "Tirunelveli",
+    "Trichy",
+    "Vellore",
+    "Villupuram",
+    "Virudhunagar",
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,45 +62,67 @@ const AddHospitalForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    const phoneRegex = /^[6-9]\d{9}$/; // Starts with 6-9 and has exactly 10 digits.
+
     if (!formData.hospital_name) newErrors.hospital_name = "Hospital name is required";
     if (!formData.hospital_type) newErrors.hospital_type = "Hospital type is required";
-    if (!formData.address) newErrors.address = "Address is required";
+    if (!formData.address) newErrors.address = "District is required";
     if (!formData.phone_no) {
       newErrors.phone_no = "Phone number is required";
-    } else if (!/^\d{10}$/.test(formData.phone_no)) {
-      newErrors.phone_no = "Phone number must be 10 digits";
+    } else if (!phoneRegex.test(formData.phone_no)) {
+      newErrors.phone_no = "Phone number must start with 6-9 and have 10 digits";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setOpenDialog(true); // Show confirmation dialog if form is valid
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (validateForm()) {
+    try {
+      const response = await axios.post("http://localhost:5001/add-hospital", formData);
+      setSnackbar({ open: true, message: "Hospital added successfully!", severity: "success" });
+      setTimeout(() => {
+        navigate("/view-hospital"); // Navigate to the view hospital page after a short delay
+      }, 1000); // 1-second delay
+    } catch (error) {
+      console.error("Error adding hospital:", error);
+    
+
+      if (error.response) {
+        const { message } = error.response.data;
+        console.log(error.response.data);
+       
+    
+        if (message === "Hospital name already exists") {
+          setSnackbar({
+            open: true,
+            message: "Hospital name is already in use. Please choose another name.",
+            severity: "error",
+          });
+        } else {
+          setSnackbar({
+            open: true,
+            message: message || "Hospital already exists",
+            severity: "error",
+          });
+        }
     } else {
-      setFailureMessage("Failed to add hospital. Please check the form.");
-      setSuccessMessage("");
+        setSnackbar({
+          open: true,
+          message: "An unexpected error occurred. Please try again later.",
+          severity: "error",
+        });
     }
-  };
+    
+    }
+  }
+};
 
-  const handleConfirmSubmit = () => {
-    setSuccessMessage("Hospital added successfully!");
-    navigate("/side");
-    setFailureMessage("");
-    setFormData({
-      hospital_name: "",
-      hospital_type: "",
-      address: "",
-      phone_no: "",
-    });
-    setErrors({});
-    setOpenDialog(false); // Close the dialog after submission
-  };
 
-  const handleCancelSubmit = () => {
-    setOpenDialog(false); // Close the dialog without submitting
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -100,26 +158,43 @@ const AddHospitalForm = () => {
             helperText={errors.hospital_name}
             margin="normal"
           />
-          <TextField
-            fullWidth
-            label="Hospital Type"
-            name="hospital_type"
-            value={formData.hospital_type}
-            onChange={handleChange}
-            error={!!errors.hospital_type}
-            helperText={errors.hospital_type}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            error={!!errors.address}
-            helperText={errors.address}
-            margin="normal"
-          />
+
+          <FormControl fullWidth margin="normal">
+            <TextField
+              select
+              label="Hospital Type"
+              name="hospital_type"
+              value={formData.hospital_type}
+              onChange={handleChange}
+              error={!!errors.hospital_type}
+              helperText={errors.hospital_type}
+            >
+              {hospitalTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormControl>
+
+          <FormControl fullWidth margin="normal">
+            <TextField
+              select
+              label="District"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              error={!!errors.address}
+              helperText={errors.address}
+            >
+              {districts.map((district) => (
+                <MenuItem key={district} value={district}>
+                  {district}
+                </MenuItem>
+              ))}
+            </TextField>
+          </FormControl>
+
           <TextField
             fullWidth
             label="Phone Number"
@@ -139,42 +214,20 @@ const AddHospitalForm = () => {
           >
             Add Hospital
           </Button>
-          {successMessage && (
-            <Typography
-              variant="body2"
-              align="center"
-              sx={{ color: "green", mt: 2 }}
-            >
-              {successMessage}
-            </Typography>
-          )}
-          {failureMessage && (
-            <Typography
-              variant="body2"
-              align="center"
-              sx={{ color: "red", mt: 2 }}
-            >
-              {failureMessage}
-            </Typography>
-          )}
         </form>
       </Paper>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={handleCancelSubmit}>
-        <DialogTitle>Confirm Submission</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">Are you sure you want to add this hospital?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelSubmit} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmSubmit} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Snackbar for Success or Error Messages */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

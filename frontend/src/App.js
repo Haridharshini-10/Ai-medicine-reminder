@@ -9,15 +9,25 @@ import AddHospitalForm from "./AddHospitalForm";
 import AddPatientForm from "./AddPatientForm";
 import ViewHospitals from "./ViewHospitals";
 import EditHospital from "./EditHospital";
-import ViewPatients from "./Viewpatient";
 import EditPatientForm from "./Editpatient";
 import ViewMedicines from "./Viewmedicine";
 import EditMedicine from "./Editmedicine";
+import ViewPatients from "./Viewpatient";
+import AddDoctorForm from "./AddDoctorForm";
+import ViewDoctors from "./ViewDoctor";
+import EditDoctor from "./EditDoctor";
+import AddTreatmentForm from "./AddTreamtmentForm";
+import ViewTreatment from "./ViewTreaments";
+import EditTreatment from "./EditTreatment";
+import AddReminderForm from "./AddReminderForm";
+import ViewReminders from "./ViewReminders";
+import EditReminder from "./EditReminder";
+
 const AppContent = () => {
   const location = useLocation();
 
   // Define routes where the Navbar should NOT appear
-  const noNavbarRoutes = ["/register", "/", "/side", "/add-medicine", "/add-hospital", "/add-patient"];
+  const noNavbarRoutes = ["/register", "/", "/side", "/add-medicine", "/add-hospital", "/add-patient","/add-doctor"];
 
   return (
     <>
@@ -40,6 +50,21 @@ const AppContent = () => {
         <Route path="/edit-patients" element={<EditPatientForm />} />
         <Route path="/view-medicines" element={<ViewMedicines/>} />
         <Route path="/edit-medicines" element={<EditMedicine />} />
+        <Route path="/edit-hospital/:hospitalId" element={<EditHospital />} />
+        <Route path="/edit-patients/:patientId" element={<EditPatientForm/>} />
+        <Route path="/add-doctor" element={<AddDoctorForm/>}/>
+        <Route path="/view-doctors"element={<ViewDoctors/>}/>
+        <Route path="/edit-doctor"element={<EditDoctor/>}/>
+        <Route path="/edit-doctor/:doctorId" element={<EditDoctor />} />
+        <Route path = "/edit-medicines/:medicineId" element = {<EditMedicine />}/>
+        <Route path = "/add-prescribed-medicine" element = {<AddTreatmentForm />}/>
+        <Route path = "/view-treatments" element = {<ViewTreatment />} />
+        <Route path = "/edit-prescribed-medicine/:treatmentId" element = {<EditTreatment />} />
+        <Route path = "/add-reminder" element = {<AddReminderForm />} />
+        <Route path = "/view-reminder" element = {<ViewReminders />} />
+        <Route path = "/edit-reminders/:reminderId" element = {<EditReminder />} />
+        
+
 
 
         
